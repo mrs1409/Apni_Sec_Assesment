@@ -49,8 +49,10 @@ export class UserService implements IUserService {
 
     const updatedUser = await this.userRepository.update(userId, data);
 
-    // Send profile updated email asynchronously
-    this.emailService.sendProfileUpdatedEmail(updatedUser.email, updatedUser.firstName);
+    // Send profile updated email asynchronously (fire-and-forget)
+    this.emailService.sendProfileUpdatedEmail(updatedUser.email, updatedUser.firstName).catch((err) => {
+      console.error('Failed to send profile updated email:', err);
+    });
 
     return UserRepository.toPublic(updatedUser);
   }

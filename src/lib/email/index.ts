@@ -132,14 +132,16 @@ export class EmailService implements IEmailService {
     }
     
     try {
-      await this.getResend()!.emails.send({
+      console.log(`📧 Sending password reset email to: ${email}`);
+      const result = await this.getResend()!.emails.send({
         from: this.fromEmail,
         to: email,
         subject: 'Password Reset Request - ApniSec',
         html: this.getPasswordResetEmailTemplate(firstName, resetLink),
       });
+      console.log(`✅ Password reset email sent successfully:`, result);
     } catch (error) {
-      console.error('Failed to send password reset email:', error);
+      console.error('❌ Failed to send password reset email:', error);
     }
   }
 
@@ -154,14 +156,16 @@ export class EmailService implements IEmailService {
     }
     
     try {
-      await this.getResend()!.emails.send({
+      console.log(`📧 Sending verification email to: ${email}`);
+      const result = await this.getResend()!.emails.send({
         from: this.fromEmail,
         to: email,
         subject: 'Verify Your Email - ApniSec',
         html: this.getVerificationEmailTemplate(firstName, verificationLink),
       });
+      console.log(`✅ Verification email sent successfully:`, result);
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      console.error('❌ Failed to send verification email:', error);
     }
   }
 

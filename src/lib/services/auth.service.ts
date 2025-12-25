@@ -106,7 +106,10 @@ export class AuthService implements IAuthService {
     const verificationToken = await this.userRepository.setEmailVerificationToken(user.id);
     const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
 
-    await this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink);
+    // Send verification email asynchronously (fire-and-forget)
+    this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink).catch((err) => {
+      console.error('Failed to send verification email:', err);
+    });
   }
 
   public async login(data: ILoginDTO): Promise<IAuthResponse> {
@@ -168,7 +171,10 @@ export class AuthService implements IAuthService {
     const resetToken = await this.userRepository.setPasswordResetToken(user.id);
     const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
-    await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
+    // Send password reset email asynchronously (fire-and-forget)
+    this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink).catch((err) => {
+      console.error('Failed to send password reset email:', err);
+    });
   }
 
   public async resetPassword(token: string, newPassword: string): Promise<void> {
