@@ -11,8 +11,7 @@ import {
 import { 
   AuthenticationError, 
   ConflictError, 
-  NotFoundError,
-  ValidationError 
+  NotFoundError
 } from '../errors';
 
 export interface IAuthService {
@@ -21,10 +20,6 @@ export interface IAuthService {
   logout(userId: string): Promise<void>;
   getCurrentUser(userId: string): Promise<IUserPublic>;
   refreshTokens(refreshToken: string): Promise<IAuthResponse>;
-  forgotPassword(email: string): Promise<void>;
-  resetPassword(token: string, newPassword: string): Promise<void>;
-  sendVerificationEmail(userId: string): Promise<void>;
-  verifyEmail(token: string): Promise<void>;
 }
 
 /**
@@ -76,12 +71,9 @@ export class AuthService implements IAuthService {
 
     await this.userRepository.updateRefreshToken(user.id, refreshToken);
 
-    // Send welcome email asynchronously
-    this.emailService.sendWelcomeEmail(user.email, user.firstName);
-
-    // Send verification email asynchronously
-    this.sendVerificationEmail(user.id).catch((err) => {
-      console.error('Failed to send verification email:', err);
+    // Send welcome email asynchronously (don't block registration)
+    this.emailService.sendWelcomeEmail(user.email, user.firstName).catch((err) => {
+      console.error('Failed to send welcome email:', err);
     });
 
     return {
@@ -105,11 +97,6 @@ export class AuthService implements IAuthService {
 
     if (!isPasswordValid) {
       throw new AuthenticationError('Invalid email or password');
-    }
-
-    // Check if email is verified
-    if (!user.emailVerified) {
-      throw new AuthenticationError('Please verify your email before logging in. Check your inbox for the verification link.');
     }
 
     const tokenPayload: ITokenPayload = {
@@ -173,79 +160,5 @@ export class AuthService implements IAuthService {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     };
-  }
-
-  /**
-   * Initiate password reset - sends email with reset link
-   */
-  public async forgotPassword(email: string): Promise<void> {
-    const user = await this.userRepository.findByEmail(email);
-
-    // Don't reveal if user exists or not for security
-    if (!user) {
-      return;
-    }
-
-    const resetToken = await this.userRepository.setPasswordResetToken(user.id);
-    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-
-    // Send password reset email
-    await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
-  }
-
-  /**
-   * Reset password using token
-   */
-  public async resetPassword(token: string, newPassword: string): Promise<void> {
-    const user = await this.userRepository.findByPasswordResetToken(token);
-
-    if (!user) {
-      throw new ValidationError('Invalid or expired reset token');
-    }
-
-    if (!user.passwordResetExpiry || new Date() > user.passwordResetExpiry) {
-      throw new ValidationError('Reset token has expired');
-    }
-
-    const hashedPassword = await this.passwordService.hash(newPassword);
-    await this.userRepository.resetPassword(user.id, hashedPassword);
-  }
-
-  /**
-   * Send email verification link
-   */
-  public async sendVerificationEmail(userId: string): Promise<void> {
-    const user = await this.userRepository.findById(userId);
-
-    if (!user) {
-      throw new NotFoundError('User');
-    }
-
-    if (user.emailVerified) {
-      throw new ValidationError('Email is already verified');
-    }
-
-    const verificationToken = await this.userRepository.setEmailVerificationToken(user.id);
-    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${verificationToken}`;
-
-    // Send verification email
-    await this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink);
-  }
-
-  /**
-   * Verify email using token
-   */
-  public async verifyEmail(token: string): Promise<void> {
-    const user = await this.userRepository.findByEmailVerificationToken(token);
-
-    if (!user) {
-      throw new ValidationError('Invalid or expired verification token');
-    }
-
-    if (!user.emailVerificationExpiry || new Date() > user.emailVerificationExpiry) {
-      throw new ValidationError('Verification token has expired');
-    }
-
-    await this.userRepository.verifyEmail(user.id);
   }
 }

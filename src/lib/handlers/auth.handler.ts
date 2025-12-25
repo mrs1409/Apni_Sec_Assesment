@@ -12,10 +12,6 @@ export interface IAuthHandler {
   logout(request: NextRequest): Promise<NextResponse>;
   getCurrentUser(request: NextRequest): Promise<NextResponse>;
   refreshToken(request: NextRequest): Promise<NextResponse>;
-  forgotPassword(email: string): Promise<void>;
-  resetPassword(token: string, newPassword: string): Promise<void>;
-  sendVerificationEmail(userId: string): Promise<void>;
-  verifyEmail(token: string): Promise<void>;
 }
 
 export class AuthHandler implements IAuthHandler {
@@ -48,12 +44,12 @@ export class AuthHandler implements IAuthHandler {
       
       const result = await this.authService.register(validatedData);
 
-      // Do NOT set auth cookies - user must verify email first before they can login
-      // Tokens are only returned for reference but not stored in cookies
+      // Set auth cookies - user is logged in immediately after registration
+      await setAuthCookies(result.accessToken, result.refreshToken!);
 
       const response: IApiResponse<IAuthResponse> = {
         success: true,
-        message: 'Registration successful. Please verify your email before logging in.',
+        message: 'Registration successful. Welcome to ApniSec!',
         data: result,
       };
 
@@ -161,33 +157,5 @@ export class AuthHandler implements IAuthHandler {
       const { status, body } = ErrorHandler.handle(error);
       return NextResponse.json(body, { status });
     }
-  }
-
-  /**
-   * Initiate password reset flow
-   */
-  public async forgotPassword(email: string): Promise<void> {
-    await this.authService.forgotPassword(email);
-  }
-
-  /**
-   * Reset password with token
-   */
-  public async resetPassword(token: string, newPassword: string): Promise<void> {
-    await this.authService.resetPassword(token, newPassword);
-  }
-
-  /**
-   * Send email verification
-   */
-  public async sendVerificationEmail(userId: string): Promise<void> {
-    await this.authService.sendVerificationEmail(userId);
-  }
-
-  /**
-   * Verify email with token
-   */
-  public async verifyEmail(token: string): Promise<void> {
-    await this.authService.verifyEmail(token);
   }
 }

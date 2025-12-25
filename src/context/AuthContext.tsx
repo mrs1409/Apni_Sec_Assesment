@@ -73,13 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (data.data?.user) {
       setUser(data.data.user);
-      // Check if email is verified before redirecting to dashboard
-      if (data.data.user.emailVerified) {
-        router.push('/dashboard');
-      } else {
-        // This shouldn't happen with the new login check, but just in case
-        router.push('/verify-email/pending');
-      }
+      router.push('/dashboard');
     }
   };
 
@@ -98,10 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (data.data?.user) {
-      // Don't set user in state yet - they need to verify email first
-      // Redirect to verification pending page with email for resend functionality
-      const email = encodeURIComponent(registerData.email);
-      router.push(`/verify-email/pending?email=${email}`);
+      // Set user in state and redirect to dashboard
+      setUser(data.data.user);
+      router.push('/dashboard');
     }
   };
 

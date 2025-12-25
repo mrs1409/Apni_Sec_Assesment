@@ -1,37 +1,21 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Shield, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Shield, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 function LoginForm() {
   const { login } = useAuth();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-
-  useEffect(() => {
-    // Check for email verification success/error from URL
-    const verified = searchParams.get('verified');
-    const verifyError = searchParams.get('verifyError');
-
-    if (verified === 'true') {
-      setSuccessMessage('Email verified successfully! You can now log in.');
-    } else if (verifyError === 'true') {
-      setError('Email verification failed. The link may have expired or is invalid.');
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -110,13 +94,6 @@ function LoginForm() {
             </Link>
           </p>
 
-          {successMessage && (
-            <div className="bg-green-50 border-3 border-green-500 p-4 mb-6 flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-              <p className="text-green-600 font-medium">{successMessage}</p>
-            </div>
-          )}
-
           {error && (
             <div className="bg-red-50 border-3 border-red-500 p-4 mb-6">
               <p className="text-red-600 font-medium">{error}</p>
@@ -144,14 +121,9 @@ function LoginForm() {
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label htmlFor="password" className="block text-sm font-bold text-[#1a1a2e] uppercase tracking-wide">
-                  Password
-                </label>
-                <Link href="/forgot-password" className="text-sm text-[#4ade80] font-semibold hover:underline">
-                  Forgot Password?
-                </Link>
-              </div>
+              <label htmlFor="password" className="block text-sm font-bold text-[#1a1a2e] uppercase tracking-wide mb-2">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] pointer-events-none" />
                 <input
