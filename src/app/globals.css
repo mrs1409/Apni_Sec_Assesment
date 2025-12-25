@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fafafa;
+  --foreground: #1a1a2e;
+  --primary: #4ade80;
+  --primary-dark: #22c55e;
+  --secondary: #1a1a2e;
+  --accent: #f59e0b;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --border: #1a1a2e;
+  --border-light: #e2e8f0;
+  --text-muted: #64748b;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --success: #22c55e;
+  --info: #3b82f6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  line-height: 1.6;
+}
+
+/* Neo Brutalism Button Styles */
+.btn-neo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0 var(--border);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-neo:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--border);
+}
+
+.btn-neo:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--border);
+}
+
+.btn-neo-primary {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+.btn-neo-secondary {
+  background-color: var(--surface);
+  color: var(--secondary);
+}
+
+.btn-neo-dark {
+  background-color: var(--secondary);
+  color: var(--surface);
+}
+
+/* Neo Brutalism Card Styles */
+.card-neo {
+  background-color: var(--surface);
+  border: 3px solid var(--border);
+  box-shadow: 6px 6px 0 var(--border);
+}
+
+.card-neo-sm {
+  background-color: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: 4px 4px 0 var(--border);
+}
+
+/* Neo Brutalism Input Styles */
+.input-neo {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface);
+  border: 3px solid var(--border);
+  font-size: 1rem;
+  transition: all 0.15s ease;
+}
+
+.input-neo:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 var(--border);
+}
+
+.input-neo::placeholder {
+  color: var(--text-muted);
+}
+
+/* Hide browser autofill icons and credential manager icons */
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credit-card-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
+/* Hide autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+}
+
+/* Better input with icon spacing */
+.input-neo.pl-12 {
+  padding-left: 3rem;
+}
+
+.input-neo.pl-10 {
+  padding-left: 2.5rem;
+}
+
+/* Neo Brutalism Select Styles */
+.select-neo {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface);
+  border: 3px solid var(--border);
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231a1a2e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+}
+
+.select-neo:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 var(--border);
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--border);
+}
+
+.badge-success {
+  background-color: var(--success);
+  color: white;
+}
+
+.badge-warning {
+  background-color: var(--warning);
+  color: var(--secondary);
+}
+
+.badge-error {
+  background-color: var(--error);
+  color: white;
+}
+
+.badge-info {
+  background-color: var(--info);
+  color: white;
+}
+
+/* Loading Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
