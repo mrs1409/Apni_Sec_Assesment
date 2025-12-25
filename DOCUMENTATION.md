@@ -4,13 +4,18 @@
 1. [Overview](#overview)
 2. [Architecture](#architecture)
 3. [Authentication System](#authentication-system)
-4. [Rate Limiting](#rate-limiting)
-5. [Email Service](#email-service)
-6. [Database Schema](#database-schema)
-7. [API Documentation](#api-documentation)
-8. [Frontend Components](#frontend-components)
-9. [Error Handling](#error-handling)
-10. [Security Considerations](#security-considerations)
+4. [Email Verification & Password Reset](#email-verification--password-reset)
+5. [Rate Limiting](#rate-limiting)
+6. [Email Service](#email-service)
+7. [Database Schema](#database-schema)
+8. [API Documentation](#api-documentation)
+9. [Frontend Components](#frontend-components)
+10. [Error Handling](#error-handling)
+11. [Security Considerations](#security-considerations)
+12. [SEO Optimization](#seo-optimization)
+13. [Testing](#testing)
+14. [Deployment](#deployment)
+15. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -638,5 +643,3 @@ Prisma ORM uses parameterized queries, preventing SQL injection attacks by defau
    - Consider increasing limits for development
 
 ---
-
-*Documentation last updated: 2024*
