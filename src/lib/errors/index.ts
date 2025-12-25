@@ -117,8 +117,12 @@ export class ErrorHandler {
       };
     }
 
+    // Log detailed error for debugging
     console.error('Unhandled error:', error);
-    const internalError = new InternalServerError();
+    
+    // In production, provide more details to help debug deployment issues
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const internalError = new InternalServerError(errorMessage);
     return {
       status: internalError.statusCode,
       body: internalError.toJSON(),
