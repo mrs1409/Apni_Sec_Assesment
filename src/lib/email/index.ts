@@ -62,14 +62,16 @@ export class EmailService implements IEmailService {
     }
     
     try {
-      await this.getResend()!.emails.send({
+      console.log(`📧 Sending welcome email to: ${email}`);
+      const result = await this.getResend()!.emails.send({
         from: this.fromEmail,
         to: email,
         subject: 'Welcome to ApniSec - Your Cybersecurity Partner',
         html: this.getWelcomeEmailTemplate(firstName),
       });
+      console.log(`✅ Welcome email sent successfully:`, result);
     } catch (error) {
-      console.error('Failed to send welcome email:', error);
+      console.error('❌ Failed to send welcome email:', error);
     }
   }
 
@@ -84,14 +86,16 @@ export class EmailService implements IEmailService {
     }
     
     try {
-      await this.getResend()!.emails.send({
+      console.log(`📧 Sending issue created email to: ${email}`);
+      const result = await this.getResend()!.emails.send({
         from: this.fromEmail,
         to: email,
         subject: `Issue Created: ${issue.title} - ApniSec`,
         html: this.getIssueCreatedEmailTemplate(firstName, issue),
       });
+      console.log(`✅ Issue created email sent successfully:`, result);
     } catch (error) {
-      console.error('Failed to send issue created email:', error);
+      console.error('❌ Failed to send issue created email:', error);
     }
   }
 
@@ -102,14 +106,16 @@ export class EmailService implements IEmailService {
     }
     
     try {
-      await this.getResend()!.emails.send({
+      console.log(`📧 Sending profile updated email to: ${email}`);
+      const result = await this.getResend()!.emails.send({
         from: this.fromEmail,
         to: email,
         subject: 'Profile Updated - ApniSec',
         html: this.getProfileUpdatedEmailTemplate(firstName),
       });
+      console.log(`✅ Profile updated email sent successfully:`, result);
     } catch (error) {
-      console.error('Failed to send profile updated email:', error);
+      console.error('❌ Failed to send profile updated email:', error);
     }
   }
 
