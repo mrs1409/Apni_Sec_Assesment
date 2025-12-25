@@ -3,9 +3,11 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://apnisec.com/sitemap.xml
+Sitemap: https://apnisecassesment.netlify.app/sitemap.xml
 
 # Disallow admin/api routes
 Disallow: /api/
 Disallow: /dashboard
 Disallow: /profile
+Disallow: /verify-email
+Disallow: /reset-password
