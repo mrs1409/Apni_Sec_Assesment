@@ -13,7 +13,8 @@ async function migrate() {
       ADD COLUMN IF NOT EXISTS "emailVerificationToken" TEXT,
       ADD COLUMN IF NOT EXISTS "emailVerificationExpiry" TIMESTAMP(3),
       ADD COLUMN IF NOT EXISTS "passwordResetToken" TEXT,
-      ADD COLUMN IF NOT EXISTS "passwordResetExpiry" TIMESTAMP(3);
+      ADD COLUMN IF NOT EXISTS "passwordResetExpiry" TIMESTAMP(3),
+      ADD COLUMN IF NOT EXISTS "welcomeEmailSent" BOOLEAN NOT NULL DEFAULT false;
     `;
     
     console.log('✅ Columns added successfully');

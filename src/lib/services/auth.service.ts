@@ -140,6 +140,16 @@ export class AuthService implements IAuthService {
 
     await this.userRepository.updateRefreshToken(user.id, refreshToken);
 
+    // Send welcome email on first login only (async, don't block login)
+    if (!user.welcomeEmailSent) {
+      this.emailService.sendWelcomeEmail(user.email, user.firstName).then(async () => {
+        // Mark welcome email as sent
+        await this.userRepository.markWelcomeEmailSent(user.id);
+      }).catch((err) => {
+        console.error('Failed to send welcome email:', err);
+      });
+    }
+
     return {
       user: UserRepository.toPublic(user),
       accessToken,

@@ -12,6 +12,7 @@ export interface IUser {
   emailVerificationExpiry: Date | null;
   passwordResetToken: string | null;
   passwordResetExpiry: Date | null;
+  welcomeEmailSent: boolean;
   refreshToken: string | null;
   createdAt: Date;
   updatedAt: Date;

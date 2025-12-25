@@ -14,6 +14,7 @@ export interface IUserRepository {
   resetPassword(id: string, hashedPassword: string): Promise<void>;
   setEmailVerificationToken(id: string): Promise<string>;
   verifyEmail(id: string): Promise<void>;
+  markWelcomeEmailSent(id: string): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
@@ -128,6 +129,15 @@ export class UserRepository implements IUserRepository {
         emailVerified: true,
         emailVerificationToken: null,
         emailVerificationExpiry: null,
+      },
+    });
+  }
+
+  public async markWelcomeEmailSent(id: string): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: {
+        welcomeEmailSent: true,
       },
     });
   }
