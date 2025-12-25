@@ -68,10 +68,13 @@ export class AuthService implements IAuthService {
     const verificationToken = await this.userRepository.setEmailVerificationToken(user.id);
     const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
 
-    // Send verification email asynchronously
-    this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink).catch((err) => {
+    // Send verification email - wait for it to complete to prevent serverless function termination
+    try {
+      await this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink);
+    } catch (err) {
       console.error('Failed to send verification email:', err);
-    });
+      // Don't block registration if email fails
+    }
 
     return {
       user: UserRepository.toPublic(user),
@@ -106,10 +109,13 @@ export class AuthService implements IAuthService {
     const verificationToken = await this.userRepository.setEmailVerificationToken(user.id);
     const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
 
-    // Send verification email asynchronously (fire-and-forget)
-    this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink).catch((err) => {
+    // Send verification email - wait for it to complete to prevent serverless function termination
+    try {
+      await this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink);
+    } catch (err) {
       console.error('Failed to send verification email:', err);
-    });
+      // Don't throw - allow resend to complete even if email fails
+    }
   }
 
   public async login(data: ILoginDTO): Promise<IAuthResponse> {
@@ -171,10 +177,13 @@ export class AuthService implements IAuthService {
     const resetToken = await this.userRepository.setPasswordResetToken(user.id);
     const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
-    // Send password reset email asynchronously (fire-and-forget)
-    this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink).catch((err) => {
+    // Send password reset email - wait for it to complete to prevent serverless function termination
+    try {
+      await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
+    } catch (err) {
       console.error('Failed to send password reset email:', err);
-    });
+      // Don't throw - security best practice to not reveal if user exists
+    }
   }
 
   public async resetPassword(token: string, newPassword: string): Promise<void> {
