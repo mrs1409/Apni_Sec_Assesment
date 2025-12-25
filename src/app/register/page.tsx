@@ -20,6 +20,8 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,6 +82,9 @@ export default function RegisterPage() {
         phone: formData.phone || undefined,
         company: formData.company || undefined,
       });
+      // Registration successful - show success message
+      setRegisteredEmail(formData.email);
+      setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
@@ -154,13 +159,34 @@ export default function RegisterPage() {
             </Link>
           </p>
 
-          {error && (
-            <div className="bg-red-50 border-3 border-red-500 p-4 mb-6">
-              <p className="text-red-600 font-medium">{error}</p>
+          {success ? (
+            <div className="bg-[#4ade80] border-3 border-[#1a1a2e] p-8 text-center">
+              <div className="w-16 h-16 bg-white border-3 border-[#1a1a2e] mx-auto mb-6 flex items-center justify-center">
+                <Mail className="w-8 h-8 text-[#4ade80]" />
+              </div>
+              <h3 className="text-2xl font-black text-[#1a1a2e] mb-4">Check Your Email!</h3>
+              <p className="text-[#1a1a2e] mb-6">
+                We&apos;ve sent a verification link to <strong>{registeredEmail}</strong>
+              </p>
+              <p className="text-[#1a1a2e] text-sm mb-6">
+                Click the link in the email to verify your account and start using ApniSec.
+              </p>
+              <Link
+                href="/login"
+                className="btn-neo bg-white text-[#1a1a2e] border-[#1a1a2e] hover:bg-[#1a1a2e] hover:text-white inline-flex items-center justify-center px-6 py-3"
+              >
+                Go to Login
+              </Link>
             </div>
-          )}
+          ) : (
+            <>
+              {error && (
+                <div className="bg-red-50 border-3 border-red-500 p-4 mb-6">
+                  <p className="text-red-600 font-medium">{error}</p>
+                </div>
+              )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-bold text-[#1a1a2e] uppercase tracking-wide mb-2">
@@ -358,6 +384,8 @@ export default function RegisterPage() {
               Privacy Policy
             </Link>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>

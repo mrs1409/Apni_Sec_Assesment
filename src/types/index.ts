@@ -7,6 +7,11 @@ export interface IUser {
   phone: string | null;
   company: string | null;
   role: string;
+  emailVerified: boolean;
+  emailVerificationToken: string | null;
+  emailVerificationExpiry: Date | null;
+  passwordResetToken: string | null;
+  passwordResetExpiry: Date | null;
   refreshToken: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +25,7 @@ export interface IUserPublic {
   phone: string | null;
   company: string | null;
   role: string;
+  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

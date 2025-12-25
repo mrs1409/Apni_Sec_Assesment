@@ -15,11 +15,15 @@ import {
 } from '../errors';
 
 export interface IAuthService {
-  register(data: ICreateUserDTO): Promise<IAuthResponse>;
+  register(data: ICreateUserDTO): Promise<{ user: IUserPublic }>;
   login(data: ILoginDTO): Promise<IAuthResponse>;
   logout(userId: string): Promise<void>;
   getCurrentUser(userId: string): Promise<IUserPublic>;
   refreshTokens(refreshToken: string): Promise<IAuthResponse>;
+  verifyEmail(token: string): Promise<void>;
+  resendVerificationEmail(email: string): Promise<void>;
+  forgotPassword(email: string): Promise<void>;
+  resetPassword(token: string, newPassword: string): Promise<void>;
 }
 
 /**
@@ -46,7 +50,7 @@ export class AuthService implements IAuthService {
     return this._emailService;
   }
 
-  public async register(data: ICreateUserDTO): Promise<IAuthResponse> {
+  public async register(data: ICreateUserDTO): Promise<{ user: IUserPublic }> {
     const existingUser = await this.userRepository.findByEmail(data.email);
     
     if (existingUser) {
@@ -60,27 +64,49 @@ export class AuthService implements IAuthService {
       password: hashedPassword,
     });
 
-    const tokenPayload: ITokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    };
+    // Generate email verification token
+    const verificationToken = await this.userRepository.setEmailVerificationToken(user.id);
+    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
 
-    const accessToken = this.tokenService.generateAccessToken(tokenPayload);
-    const refreshToken = this.tokenService.generateRefreshToken(tokenPayload);
-
-    await this.userRepository.updateRefreshToken(user.id, refreshToken);
-
-    // Send welcome email asynchronously (don't block registration)
-    this.emailService.sendWelcomeEmail(user.email, user.firstName).catch((err) => {
-      console.error('Failed to send welcome email:', err);
+    // Send verification email asynchronously
+    this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink).catch((err) => {
+      console.error('Failed to send verification email:', err);
     });
 
     return {
       user: UserRepository.toPublic(user),
-      accessToken,
-      refreshToken,
     };
+  }
+
+  public async verifyEmail(token: string): Promise<void> {
+    const user = await this.userRepository.findByEmailVerificationToken(token);
+
+    if (!user) {
+      throw new NotFoundError('Invalid or expired verification token');
+    }
+
+    if (user.emailVerificationExpiry && user.emailVerificationExpiry < new Date()) {
+      throw new AuthenticationError('Verification token has expired');
+    }
+
+    await this.userRepository.verifyEmail(user.id);
+  }
+
+  public async resendVerificationEmail(email: string): Promise<void> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    if (user.emailVerified) {
+      throw new ConflictError('Email is already verified');
+    }
+
+    const verificationToken = await this.userRepository.setEmailVerificationToken(user.id);
+    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
+
+    await this.emailService.sendVerificationEmail(user.email, user.firstName, verificationLink);
   }
 
   public async login(data: ILoginDTO): Promise<IAuthResponse> {
@@ -99,6 +125,10 @@ export class AuthService implements IAuthService {
       throw new AuthenticationError('Invalid email or password');
     }
 
+    if (!user.emailVerified) {
+      throw new AuthenticationError('Please verify your email before logging in');
+    }
+
     const tokenPayload: ITokenPayload = {
       userId: user.id,
       email: user.email,
@@ -115,6 +145,35 @@ export class AuthService implements IAuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  public async forgotPassword(email: string): Promise<void> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      // Don't reveal that the user doesn't exist
+      return;
+    }
+
+    const resetToken = await this.userRepository.setPasswordResetToken(user.id);
+    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+
+    await this.emailService.sendPasswordResetEmail(user.email, user.firstName, resetLink);
+  }
+
+  public async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findByPasswordResetToken(token);
+
+    if (!user) {
+      throw new NotFoundError('Invalid or expired reset token');
+    }
+
+    if (user.passwordResetExpiry && user.passwordResetExpiry < new Date()) {
+      throw new AuthenticationError('Reset token has expired');
+    }
+
+    const hashedPassword = await this.passwordService.hash(newPassword);
+    await this.userRepository.resetPassword(user.id, hashedPassword);
   }
 
   public async logout(userId: string): Promise<void> {

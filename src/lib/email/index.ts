@@ -26,6 +26,8 @@ export class EmailService implements IEmailService {
 
   constructor() {
     this.fromEmail = process.env.EMAIL_FROM || 'noreply@apnisec.com';
+    console.log(`📧 Email service initialized with FROM: ${this.fromEmail}`);
+    console.log(`📧 RESEND_API_KEY exists: ${!!process.env.RESEND_API_KEY}`);
   }
 
   /**

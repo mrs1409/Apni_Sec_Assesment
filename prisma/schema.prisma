@@ -9,21 +9,28 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  password     String
-  firstName    String
-  lastName     String
-  phone        String?
-  company      String?
-  role         String    @default("user")
-  refreshToken String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  password                String
+  firstName               String
+  lastName                String
+  phone                   String?
+  company                 String?
+  role                    String    @default("user")
+  emailVerified           Boolean   @default(false)
+  emailVerificationToken  String?   @unique
+  emailVerificationExpiry DateTime?
+  passwordResetToken      String?   @unique
+  passwordResetExpiry     DateTime?
+  refreshToken            String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
   
-  issues       Issue[]
+  issues                  Issue[]
   
   @@index([email])
+  @@index([emailVerificationToken])
+  @@index([passwordResetToken])
 }
 
 model Issue {

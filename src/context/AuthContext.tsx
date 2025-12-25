@@ -85,17 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify(registerData),
     });
 
-    const data: IApiResponse<IAuthResponse> = await response.json();
+    const data: IApiResponse<{ user: IUserPublic }> = await response.json();
 
     if (!response.ok || !data.success) {
       throw new Error(data.message || 'Registration failed');
     }
 
-    if (data.data?.user) {
-      // Set user in state and redirect to dashboard
-      setUser(data.data.user);
-      router.push('/dashboard');
-    }
+    // Don't set user or redirect - user needs to verify email first
+    // Registration page will handle showing success message
   };
 
   const logout = async () => {

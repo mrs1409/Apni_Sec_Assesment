@@ -12,6 +12,10 @@ export interface IAuthHandler {
   logout(request: NextRequest): Promise<NextResponse>;
   getCurrentUser(request: NextRequest): Promise<NextResponse>;
   refreshToken(request: NextRequest): Promise<NextResponse>;
+  verifyEmail(request: NextRequest): Promise<NextResponse>;
+  resendVerificationEmail(request: NextRequest): Promise<NextResponse>;
+  forgotPassword(request: NextRequest): Promise<NextResponse>;
+  resetPassword(request: NextRequest): Promise<NextResponse>;
 }
 
 export class AuthHandler implements IAuthHandler {
@@ -44,12 +48,9 @@ export class AuthHandler implements IAuthHandler {
       
       const result = await this.authService.register(validatedData);
 
-      // Set auth cookies - user is logged in immediately after registration
-      await setAuthCookies(result.accessToken, result.refreshToken!);
-
-      const response: IApiResponse<IAuthResponse> = {
+      const response: IApiResponse<{ user: IUserPublic }> = {
         success: true,
-        message: 'Registration successful. Welcome to ApniSec!',
+        message: 'Registration successful. Please check your email to verify your account.',
         data: result,
       };
 
@@ -150,6 +151,114 @@ export class AuthHandler implements IAuthHandler {
         success: true,
         message: 'Token refreshed successfully',
         data: result,
+      };
+
+      return NextResponse.json(response, { status: 200 });
+    } catch (error) {
+      const { status, body } = ErrorHandler.handle(error);
+      return NextResponse.json(body, { status });
+    }
+  }
+
+  public async verifyEmail(request: NextRequest): Promise<NextResponse> {
+    try {
+      const { searchParams } = new URL(request.url);
+      const token = searchParams.get('token');
+
+      if (!token) {
+        throw new Error('Verification token is required');
+      }
+
+      await this.authService.verifyEmail(token);
+
+      const response: IApiResponse = {
+        success: true,
+        message: 'Email verified successfully. You can now login.',
+      };
+
+      return NextResponse.json(response, { status: 200 });
+    } catch (error) {
+      const { status, body } = ErrorHandler.handle(error);
+      return NextResponse.json(body, { status });
+    }
+  }
+
+  public async resendVerificationEmail(request: NextRequest): Promise<NextResponse> {
+    try {
+      const clientIP = this.getClientIP(request);
+      const rateLimitInfo = await this.rateLimiter.consume(`resend-verification:${clientIP}`);
+
+      const body = await request.json();
+      const { email } = body;
+
+      if (!email) {
+        throw new Error('Email is required');
+      }
+
+      await this.authService.resendVerificationEmail(email);
+
+      const response: IApiResponse = {
+        success: true,
+        message: 'Verification email sent successfully',
+      };
+
+      const nextResponse = NextResponse.json(response, { status: 200 });
+      applyRateLimitHeaders(nextResponse.headers, rateLimitInfo);
+
+      return nextResponse;
+    } catch (error) {
+      const { status, body } = ErrorHandler.handle(error);
+      return NextResponse.json(body, { status });
+    }
+  }
+
+  public async forgotPassword(request: NextRequest): Promise<NextResponse> {
+    try {
+      const clientIP = this.getClientIP(request);
+      const rateLimitInfo = await this.rateLimiter.consume(`forgot-password:${clientIP}`);
+
+      const body = await request.json();
+      const { email } = body;
+
+      if (!email) {
+        throw new Error('Email is required');
+      }
+
+      await this.authService.forgotPassword(email);
+
+      const response: IApiResponse = {
+        success: true,
+        message: 'If an account exists with this email, a password reset link has been sent.',
+      };
+
+      const nextResponse = NextResponse.json(response, { status: 200 });
+      applyRateLimitHeaders(nextResponse.headers, rateLimitInfo);
+
+      return nextResponse;
+    } catch (error) {
+      const { status, body } = ErrorHandler.handle(error);
+      return NextResponse.json(body, { status });
+    }
+  }
+
+  public async resetPassword(request: NextRequest): Promise<NextResponse> {
+    try {
+      const body = await request.json();
+      const { token, password } = body;
+
+      if (!token || !password) {
+        throw new Error('Token and password are required');
+      }
+
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+
+      await this.authService.resetPassword(token, password);
+
+      const response: IApiResponse = {
+        success: true,
+        message: 'Password reset successfully. You can now login with your new password.',
       };
 
       return NextResponse.json(response, { status: 200 });
