@@ -5,6 +5,10 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Essential Next.js Plugin for proper routing
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 # Include Prisma client files for serverless functions
 [functions]
   node_bundler = "esbuild"
