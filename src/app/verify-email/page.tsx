@@ -24,18 +24,19 @@ function VerifyEmailContent() {
         const response = await fetch(`/api/auth/verify-email?token=${token}`);
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
           setStatus('success');
           setMessage(data.message);
           // Redirect to login after 3 seconds
           setTimeout(() => router.push('/login'), 3000);
         } else {
           setStatus('error');
-          setMessage(data.message || 'Verification failed');
+          setMessage(data.message || `Verification failed (Status: ${response.status})`);
         }
       } catch (error) {
+        console.error('Verification error:', error);
         setStatus('error');
-        setMessage('An error occurred during verification');
+        setMessage('An error occurred during verification. Please try again or contact support.');
       }
     };
 
